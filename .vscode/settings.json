@@ -12,8 +12,10 @@
         "gpsd",
         "gpsdclient",
         "gpsdctl",
+        "journalctl",
         "nmea",
         "pipx",
         "vgps",
+        "xgps"
     ]
 }

@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -93,16 +94,16 @@ write_nmea_messages(int mfd)
     sprintf(date_now, "%02d%02d%02d", now->tm_mday, now->tm_mon, (now->tm_year + 1900) % 100);
     sprintf(time_now, "%02d%02d%02d", now->tm_hour, now->tm_min, now->tm_sec);
 
-    sprintf(gpgsa, "GPGGA,%s,%s,%d,%s,%d,1,12,1.0,%s,M,0.0,M,,", time_now, lat_text, NS, lon_text, WE, elevation);
-    sprintf(nmea, "$%s*%d\n", gpgsa, nmea_checksum(gpgsa));
+    sprintf(gpgga, "GPGSA,A,3,,,,,,,,,,,,,1.0,1.0,1.0");
+    sprintf(nmea, "$%s*%02X\n", gpgga, nmea_checksum(gpgga));
     write(mfd, nmea, strlen(nmea));
 
-    sprintf(gpgga, "GPGSA,A,3,,,,,,,,,,,,,1.0,1.0,1.0");
-    sprintf(nmea, "$%s*%d\n", gpgga, nmea_checksum(gpgga));
+    sprintf(gpgsa, "GPGGA,%s,%s,%d,%s,%d,1,12,1.0,%f,M,0.0,M,,", time_now, lat_text, NS, lon_text, WE, elevation);
+    sprintf(nmea, "$%s*%02X\n", gpgsa, nmea_checksum(gpgsa));
     write(mfd, nmea, strlen(nmea));
 
     sprintf(gprmc, "GPRMC,%s,A,%s,%d,%s,%d,,,%s,000.0,W", time_now, lat_text, NS, lon_text, WE, date_now);
-    sprintf(nmea, "$%s*%d\n", gprmc, nmea_checksum(gprmc));
+    sprintf(nmea, "$%s*%02X\n", gprmc, nmea_checksum(gprmc));
     write(mfd, nmea, strlen(nmea));
 }
 
@@ -178,6 +179,14 @@ main(int argc, char* argv[])
         printf("Slave name is: %s\n", pts_name);
     } else {
         printf("%s\n", pts_name);
+    }
+
+    /* Set permissions to 0444 (octal) -> read-only for all */
+    if (chmod(pts_name, 0444) != 0) {
+        if (verbose) {
+            fprintf(stderr, "Error: Unable to change permissions of '%s': %s\n", pts_name, strerror(errno));
+        }
+        return error_close_master(mfd);
     }
 
     /* Register the signal handler */
