@@ -1,0 +1,43 @@
+# Base style to inherit from (LLVM, Google, Chromium, Mozilla, WebKit, Microsoft)
+BasedOnStyle: Mozilla
+
+# Indentation settings
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never   # Options: Never, ForIndentation, Always
+
+# Brace wrapping style
+BreakBeforeBraces: Linux  # Options: Attach, Linux, Stroustrup, Allman, GNU, WebKit
+
+# Column limit for wrapping lines
+ColumnLimit: 120
+
+# # Pointer and reference alignment
+# PointerAlignment: Left     # Options: Left, Right, Middle
+# ReferenceAlignment: Left   # Options: Left, Right, Middle
+
+# # Spaces around operators and keywords
+# SpaceBeforeParens: ControlStatements  # Options: Never, ControlStatements, Always
+# SpacesInParentheses: false
+# SpacesInSquareBrackets: false
+# SpaceAfterCStyleCast: true
+
+# Include sorting
+SortIncludes: true
+IncludeBlocks: Preserve  # Options: Preserve, Merge, Regroup
+
+# # Namespace handling
+# NamespaceIndentation: All  # Options: None, Inner, All
+
+# # Align consecutive assignments and declarations
+# AlignConsecutiveAssignments: true
+# AlignConsecutiveDeclarations: true
+
+# # Keep empty lines at the start of blocks
+# KeepEmptyLinesAtTheStartOfBlocks: false
+
+# # Allow short functions on a single line
+# AllowShortFunctionsOnASingleLine: Empty  # Options: None, InlineOnly, Empty, All
+
+# # Reflow comments to fit ColumnLimit
+# ReflowComments: true

@@ -1,0 +1,19 @@
+{
+    "editor.formatOnSave": true,
+    "files.exclude": {
+        "*.o": true,
+        "vgps": true
+    },
+    "cSpell.language": "en",
+    "cSpell.words": [
+        "GPGGA",
+        "gpgsa",
+        "gprmc",
+        "gpsd",
+        "gpsdclient",
+        "gpsdctl",
+        "nmea",
+        "pipx",
+        "vgps",
+    ]
+}
