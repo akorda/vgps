@@ -13,7 +13,8 @@ sudo gpsdctl add /dev/pts/3
 sudo gpsdctl remove /dev/pts/3
 # view gpsd logs
 sudo journalctl -f -u gpsd
-# run a simple X11 client, e.g. xgps
+# run a simple gpsd client or an X11 client, e.g. xgps
+cgps -s
 # check gpsd status
 telnet localhost 2947
 ```
