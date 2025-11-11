@@ -11,6 +11,7 @@
 
 int running = 1;
 int verbose = 0;
+double latitude = 0, longitude = 0, elevation = 0;
 
 void
 handle_sigint(int sig)
@@ -50,7 +51,7 @@ nmea_checksum(const char* sentence)
 }
 
 void
-write_nmea_messages(int mfd, double latitude, double longitude, double elevation)
+write_nmea_messages(int mfd)
 {
     // NMEA minimal sequence:
     // $GPGGA,231531.521,5213.788,N,02100.712,E,1,12,1.0,0.0,M,0.0,M,,*6A
@@ -106,23 +107,47 @@ write_nmea_messages(int mfd, double latitude, double longitude, double elevation
 }
 
 int
-main(int argc, char* argv[])
+parse_args(int argc, char* argv[])
 {
     int opt;
-    char pts_name[100];
 
-    while ((opt = getopt(argc, argv, "v")) != -1) {
+    while ((opt = getopt(argc, argv, "vt:n:e:")) != -1) {
         switch (opt) {
+            case 't':
+                latitude = atof(optarg);
+                break;
+            case 'n':
+                longitude = atof(optarg);
+                break;
+            case 'e':
+                elevation = atof(optarg);
+                break;
             case 'v':
                 verbose = 1;
                 break;
             case '?': /* Unknown option or missing argument */
-                fprintf(stderr, "Unknown option: -%c\n", optopt);
-                return EXIT_FAILURE;
+                if (optopt == 't' || optopt == 'n' || optopt == 'e') {
+                    fprintf(stderr, "Option -%c requires an argument.\n", optopt);
+                } else {
+                    fprintf(stderr, "Unknown option: -%c\n", optopt);
+                }
+                return -1;
             default:
                 fprintf(stderr, "Unexpected error parsing options.\n");
-                return EXIT_FAILURE;
+                return -1;
         }
+    }
+
+    return 0;
+}
+
+int
+main(int argc, char* argv[])
+{
+    char pts_name[100];
+
+    if (parse_args(argc, argv) != 0) {
+        return EXIT_FAILURE;
     }
 
     int mfd = posix_openpt(O_RDWR | O_NOCTTY); /* Open pty master */
@@ -131,8 +156,8 @@ main(int argc, char* argv[])
         return EXIT_FAILURE;
     }
 
-    if (grantpt(mfd) == -1) /* Grant access to slave pty */
-    {
+    /* Grant access to slave pty */
+    if (grantpt(mfd) == -1) {
         return error_close_master(mfd);
     }
 
@@ -142,12 +167,12 @@ main(int argc, char* argv[])
 
     /* The returned storage is good until the next call of `ptsname` function.
      * Therefore we have to save it to our buffer */
-    char* p = ptsname(mfd);
-    if (p == NULL) {
+    char* name = ptsname(mfd);
+    if (name == NULL) {
         return error_close_master(mfd);
     }
 
-    strncpy(pts_name, p, sizeof(pts_name));
+    strncpy(pts_name, name, sizeof(pts_name));
     pts_name[sizeof(pts_name) - 1] = '\0';
     if (verbose) {
         printf("Slave name is: %s\n", pts_name);
@@ -160,11 +185,9 @@ main(int argc, char* argv[])
         return error_close_master(mfd);
     }
 
-    double lat = 23.7401864, lon = 38.3178297, elevation = 0;
-
     /* keep generating NMEA messages */
     while (running) {
-        write_nmea_messages(mfd, lat, lon, elevation);
+        write_nmea_messages(mfd);
         sleep(1);
     }
 
