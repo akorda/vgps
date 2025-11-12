@@ -64,7 +64,7 @@ write_nmea_messages(int mfd)
     int lat_deg, lon_deg;
     double lat_min, lon_min;
     char lat_text[20], lon_text[20];
-    char nmea[255], gpgga[255], gpgsa[255], gprmc[255];
+    char nmea[82], gga[82], gsa[82], rmc[82];
 
     /* N or S */
     if (latitude > 0) {
@@ -94,16 +94,16 @@ write_nmea_messages(int mfd)
     sprintf(date_now, "%02d%02d%02d", now->tm_mday, now->tm_mon, (now->tm_year + 1900) % 100);
     sprintf(time_now, "%02d%02d%02d", now->tm_hour, now->tm_min, now->tm_sec);
 
-    sprintf(gpgga, "GPGSA,A,3,,,,,,,,,,,,,1.0,1.0,1.0");
-    sprintf(nmea, "$%s*%02X\n", gpgga, nmea_checksum(gpgga));
+    sprintf(gga, "GPGGA,%s,%s,%d,%s,%d,1,12,1.0,%f.2,M,0.0,M,,", time_now, lat_text, NS, lon_text, WE, elevation);
+    sprintf(nmea, "$%s*%02X\r\n", gga, nmea_checksum(gga));
     write(mfd, nmea, strlen(nmea));
 
-    sprintf(gpgsa, "GPGGA,%s,%s,%d,%s,%d,1,12,1.0,%f,M,0.0,M,,", time_now, lat_text, NS, lon_text, WE, elevation);
-    sprintf(nmea, "$%s*%02X\n", gpgsa, nmea_checksum(gpgsa));
+    sprintf(gsa, "GPGSA,A,3,,,,,,,,,,,,,1.0,1.0,1.0");
+    sprintf(nmea, "$%s*%02X\r\n", gsa, nmea_checksum(gsa));
     write(mfd, nmea, strlen(nmea));
 
-    sprintf(gprmc, "GPRMC,%s,A,%s,%d,%s,%d,,,%s,000.0,W", time_now, lat_text, NS, lon_text, WE, date_now);
-    sprintf(nmea, "$%s*%02X\n", gprmc, nmea_checksum(gprmc));
+    sprintf(rmc, "GPRMC,%s,A,%s,%d,%s,%d,,,%s,000.0,W", time_now, lat_text, NS, lon_text, WE, date_now);
+    sprintf(nmea, "$%s*%02X\r\n", rmc, nmea_checksum(rmc));
     write(mfd, nmea, strlen(nmea));
 }
 
