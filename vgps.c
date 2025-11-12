@@ -90,9 +90,9 @@ write_nmea_messages(int mfd)
     sprintf(lon_text, "%03d%07.4f", lon_deg, lon_min);
 
     time_t nowt = time(NULL);
-    const struct tm* now = localtime(&nowt);
-    sprintf(date_now, "%02d%02d%02d", now->tm_mday, now->tm_mon, (now->tm_year + 1900) % 100);
-    sprintf(time_now, "%02d%02d%02d", now->tm_hour, now->tm_min, now->tm_sec);
+    const struct tm* utcNow = gmtime(&nowt);
+    sprintf(date_now, "%02d%02d%02d", utcNow->tm_mday, utcNow->tm_mon, (utcNow->tm_year + 1900) % 100);
+    sprintf(time_now, "%02d%02d%02d", utcNow->tm_hour, utcNow->tm_min, utcNow->tm_sec);
 
     sprintf(gga, "GPGGA,%s,%s,%d,%s,%d,1,12,1.0,%f.2,M,0.0,M,,", time_now, lat_text, NS, lon_text, WE, elevation);
     sprintf(nmea, "$%s*%02X\r\n", gga, nmea_checksum(gga));
