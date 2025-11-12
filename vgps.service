@@ -1,0 +1,14 @@
+# File to be placed under /etc/systemd/system/
+[Unit]
+Description=Virtual GPS Device
+After=multi-user.target gpsd.socket
+
+[Service]
+Type=idle
+User=root
+ExecStart=/usr/bin/local/vgps
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
