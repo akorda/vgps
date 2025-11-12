@@ -90,9 +90,9 @@ write_nmea_messages(int mfd)
     sprintf(lon_text, "%03d%07.4f", lon_deg, lon_min);
 
     time_t nowt = time(NULL);
-    const struct tm* utcNow = gmtime(&nowt);
-    sprintf(date_now, "%02d%02d%02d", utcNow->tm_mday, utcNow->tm_mon, (utcNow->tm_year + 1900) % 100);
-    sprintf(time_now, "%02d%02d%02d", utcNow->tm_hour, utcNow->tm_min, utcNow->tm_sec);
+    const struct tm* utc_now = gmtime(&nowt);
+    sprintf(date_now, "%02d%02d%02d", utc_now->tm_mday, utc_now->tm_mon, (utc_now->tm_year + 1900) % 100);
+    sprintf(time_now, "%02d%02d%02d", utc_now->tm_hour, utc_now->tm_min, utc_now->tm_sec);
 
     sprintf(gga, "GPGGA,%s,%s,%d,%s,%d,1,12,1.0,%f.2,M,0.0,M,,", time_now, lat_text, NS, lon_text, WE, elevation);
     sprintf(nmea, "$%s*%02X\r\n", gga, nmea_checksum(gga));
@@ -159,10 +159,12 @@ main(int argc, char* argv[])
 
     /* Grant access to slave pty */
     if (grantpt(mfd) == -1) {
+        fprintf(stderr, "Error: Unable to grant access to slave pty: %s\n", strerror(errno));
         return error_close_master(mfd);
     }
 
     if (unlockpt(mfd) == -1) {
+        fprintf(stderr, "Error: Unable to unlock: %s\n", strerror(errno));
         return error_close_master(mfd);
     }
 
@@ -170,27 +172,23 @@ main(int argc, char* argv[])
      * Therefore we have to save it to our buffer */
     char* name = ptsname(mfd);
     if (name == NULL) {
+        fprintf(stderr, "Error: Unable get the slave pty name: %s\n", strerror(errno));
         return error_close_master(mfd);
     }
 
     strncpy(pts_name, name, sizeof(pts_name));
     pts_name[sizeof(pts_name) - 1] = '\0';
-    if (verbose) {
-        printf("Slave name is: %s\n", pts_name);
-    } else {
-        printf("%s\n", pts_name);
-    }
+    printf("%s\n", pts_name);
 
     /* Set permissions to 0444 (octal) -> read-only for all */
     if (chmod(pts_name, 0444) != 0) {
-        if (verbose) {
-            fprintf(stderr, "Error: Unable to change permissions of '%s': %s\n", pts_name, strerror(errno));
-        }
+        fprintf(stderr, "Error: Unable to change permissions of '%s': %s\n", pts_name, strerror(errno));
         return error_close_master(mfd);
     }
 
     /* Register the signal handler */
     if (signal(SIGINT, handle_sigint) == SIG_ERR) {
+        fprintf(stderr, "Error: Unable to handle the SIGINT signal: %s\n", strerror(errno));
         return error_close_master(mfd);
     }
 
