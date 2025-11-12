@@ -18,12 +18,3 @@ cgps -s
 # check gpsd status
 telnet localhost 2947
 ```
-
-## GPS clients
-
-## gpsdclient
-
-```bash
-pipx install gpsdclient
-pipx run gpsdclient
-```
