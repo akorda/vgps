@@ -5,14 +5,15 @@
             "name": "vgps",
             "type": "cppdbg",
             "request": "launch",
+            "preLaunchTask": "build_debug",
             "program": "${workspaceFolder}/vgps",
-            "args": [
-                "-t",
-                "23.7401864",
-                "-n",
-                "38.3178297"
-            ],
-            "stopAtEntry": false,
+            // "args": [
+            //     "-t",
+            //     "23.7401864",
+            //     "-n",
+            //     "38.3178297"
+            // ],
+            "stopAtEntry": true,
             "cwd": "${fileDirname}",
             "environment": [],
             "externalConsole": false,

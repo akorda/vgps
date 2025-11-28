@@ -1,6 +1,11 @@
 PROGS =	vgps
+CC = gcc
+CFLAGS = -g
+LDFLAGS = -lm
 
 all:	$(PROGS)
+
+rebuild: clean all
 
 vgps:	vgps.o
 	$(CC) $(CFLAGS) -o vgps vgps.o $(LDFLAGS) $(LDLIBS)

@@ -10,6 +10,10 @@
 #include <time.h>
 #include <unistd.h>
 
+#define ROUND_TO(n) (floor(1000000*n)/1000000)
+
+const char *CONFIG_FILE = "/etc/vgps.conf";
+
 int running = 1;
 int verbose = 0;
 double latitude = 0, longitude = 0, elevation = 0;
@@ -143,8 +147,61 @@ parse_args(int argc, char* argv[])
 }
 
 int
+read_config_file() {
+    if (access(CONFIG_FILE, R_OK) != 0) {
+        return EXIT_SUCCESS;
+    }
+
+    FILE* file = fopen(CONFIG_FILE, "r");
+    if (file == NULL) {
+      return EXIT_FAILURE;
+    }
+
+    const int MAX_LINE_LEN = 120;
+    const char delimeter[] = "=";
+
+    char line[MAX_LINE_LEN];
+    while (fgets(line, MAX_LINE_LEN, file))
+    {
+        /* If the line is empty or starts with # (a comment) ignore it */
+        if (strlen(line) == 0 || line[0] == '#') {
+            continue;
+        }
+
+        char *token = strtok(line, delimeter);
+        if (token == NULL) {
+            continue;
+        }
+        
+        if (strcmp(token, "latitude") == 0) {
+            token = strtok(NULL, delimeter);
+            if (token != NULL) {
+                latitude = ROUND_TO(atof(token));
+            }
+        } else if (strcmp(token, "longitude") == 0) {
+            token = strtok(NULL, delimeter);
+            if (token != NULL) {
+                longitude = ROUND_TO(atof(token));
+            }
+        } else if (strcmp(token, "elevation") == 0) {
+            token = strtok(NULL, delimeter);
+            if (token != NULL) {
+                elevation = ROUND_TO(atof(token));
+            }
+        }
+    }
+
+    fclose(file);
+    return EXIT_SUCCESS;
+}
+
+int
 main(int argc, char* argv[])
 {
+    if (read_config_file() != EXIT_SUCCESS) {
+        return EXIT_FAILURE;
+    }
+
     char pts_name[100];
 
     if (parse_args(argc, argv) != 0) {
